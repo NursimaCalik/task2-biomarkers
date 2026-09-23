@@ -4,4 +4,41 @@ author: "Nursima Çalık"
 date: "2026-09-23"
 output: html_document
 ---
+## Upload Data
+```{r}
+measurements <- read.csv("data/measurements.csv")
+metadata <- read.csv("data/metadata.csv")
+```
 
+## Examine data
+
+```{r}
+dim(measurements)
+str(measurements)
+head(measurements)
+anyNA(measurements)
+
+dim(metadata)
+str(metadata)
+head(metadata)
+table(metadata$group)
+table(metadata$sex)
+anyNA(metadata)
+```
+
+## Merge data files 
+ 
+```{r}
+library(dplyr)
+base::nrow(measurements)
+base::nrow(metadata)
+
+base::names(measurements)
+base::names(metadata)
+
+base::length(base::unique(measurements$sample_id))
+base::length(base::unique(metadata$sample_id))
+
+combination_data <- dplyr::left_join(x=measurements, y=metadata, by = "sample_id")
+```
+ 
