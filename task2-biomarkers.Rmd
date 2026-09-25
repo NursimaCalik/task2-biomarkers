@@ -117,27 +117,46 @@ ggplot(data = Treatment, aes(x=sex, y= biomarker_ng_ml))+
   labs(title = "Relationship with Sex at Treatment Group",x = "Sex", y ="Biomarker(ng/ml)")+
   theme_minimal()
 
-Control_F <-filter(Control, sex == "F")
-Control_M <-filter(Control, sex == "M")
-Treatment_F <- filter(Treatment, sex =="F")
-Treatment_M <-filter(Treatment, sex =="M")
+aggregate(biomarker_ng_ml ~ sex, data = Control, FUN = mean)
+aggregate(biomarker_ng_ml ~ sex, data = Treatment, FUN = mean)
+aggregate(biomarker_ng_ml ~ sex, data = Control, FUN = sd)
+aggregate(biomarker_ng_ml ~ sex, data = Treatment, FUN = sd)
 
-mean(Control_F$biomarker_ng_ml, na.rm = TRUE)
-mean(Control_M$biomarker_ng_ml, na.rm = TRUE)
-mean(Treatment_F$biomarker_ng_ml, na.rm = TRUE)
-mean(Treatment_M$biomarker_ng_ml, na.rm = TRUE)
-
-sd(Control_F$biomarker_ng_ml, na.rm = TRUE)
-sd(Control_M$biomarker_ng_ml, na.rm = TRUE)
-sd(Treatment_F$biomarker_ng_ml, na.rm = TRUE)
-sd(Treatment_M$biomarker_ng_ml, na.rm = TRUE)
 ```
 Do the measurement batches appear different?
 ```{r}
-library(stringr)
-str_cou
+sum(combination_data$batch == "B1")
+sum(combination_data$batch == "B2")
 
+B1 <-filter(combination_data, batch == "B1")
+B2 <-filter(combination_data, batch == "B2")
 
+ggplot(data= B1, aes(x= group, y= biomarker_ng_ml))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(
+    width = 0.08,
+    height = 0
+  )+
+  labs(title = "Difference Between Groups in B1", X= "Group", y= "Biomarker(ng/ml)")+
+  theme_minimal()
 
+ggplot(data= B2, aes(x= group, y= biomarker_ng_ml))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(
+    width = 0.08,
+    height = 0
+  )+
+  labs(title = "Difference Between Groups in B2 ", X= "Group", y= "Biomarker(ng/ml)")+
+  theme_minimal()
+
+aggregate(biomarker_ng_ml ~ group, data = B1, FUN = mean )
+aggregate(biomarker_ng_ml ~ group, data = B2, FUN = mean )
+aggregate(biomarker_ng_ml ~ group, data = B1, FUN = sd )
+aggregate(biomarker_ng_ml ~ group, data = B2, FUN = sd )
 ```
+
+
+
+
+
 
