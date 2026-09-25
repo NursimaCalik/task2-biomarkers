@@ -41,4 +41,103 @@ base::length(base::unique(metadata$sample_id))
 
 combination_data <- dplyr::left_join(x=measurements, y=metadata, by = "sample_id")
 ```
- 
+
+## Examine combination data
+
+```{r}
+dim(combination_data)
+str(combination_data)
+head(combination_data)
+anyNA(combination_data)
+duplicated(combination_data$sample_id)
+sum(duplicated(combination_data$sample_id))
+```
+
+## Explore data results
+How are the biomarker measurements distributed?
+```{r}
+library(ggplot2)
+ggplot(data = combination_data, aes(x=biomarker_ng_ml, y=sample_id)) +
+  geom_point(size=1)+
+  labs(title= "Distribution of Biomarker Measurements", x ="biomarker(ng/ml)", y="Samples") +
+  theme_minimal()
+
+mean(combination_data$biomarker_ng_ml, na.rm = TRUE)
+sd(combination_data$biomarker_ng_ml, na.rm = TRUE)
+max(combination_data$biomarker_ng_ml)
+min(combination_data$biomarker_ng_ml)
+
+```
+Does the treatment group appear different from the control group?
+```{r}
+ggplot(data=combination_data, aes(x = group, y=biomarker_ng_ml)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(
+    width = 0.08,
+    height = 0
+  ) +
+  labs(title = "Difference Between Control and Treatment Group", x = "Sex", y = "Biomarker(ng/ml)") +
+  theme_minimal()
+
+library(dplyr)
+Control <-filter(combination_data, group == "Control")
+mean(Control$biomarker_ng_ml, na.rm = TRUE)
+Treatment <-filter(combination_data, group == "Treatment")
+mean(Treatment$biomarker_ng_ml, na.rm = TRUE)
+sd(Control$biomarker_ng_ml, na.rm = TRUE)
+sd(Treatment$biomarker_ng_ml, na.rm = TRUE)
+
+```
+Does age appear to be associated with the biomarker?
+```{r}
+ggplot(data = combination_data, aes(x = age, y = biomarker_ng_ml , group = group)) +
+  geom_point(size = 1, aes(color = group)) +
+  scale_y_continuous(breaks = seq(8, 20, by = 1)) +
+  scale_x_continuous(breaks = seq(25, 70,by = 2)) +
+  labs(title = "Relationship with Age", x = "Age", y= "Biomarker(ng/ml)" )+
+  theme_minimal()
+```
+Does sex appear to be associated with the biomarker?
+```{r}
+ggplot(data = Control, aes(x=sex, y= biomarker_ng_ml))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(
+    width = 0.08,
+    height = 0
+  )+
+  labs(title = "Relationship with Sex at Control Group",x = "Sex", y ="Biomarker(ng/ml)")+
+  theme_minimal()
+
+ggplot(data = Treatment, aes(x=sex, y= biomarker_ng_ml))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(
+    width = 0.08,
+    height = 0
+  )+
+  labs(title = "Relationship with Sex at Treatment Group",x = "Sex", y ="Biomarker(ng/ml)")+
+  theme_minimal()
+
+Control_F <-filter(Control, sex == "F")
+Control_M <-filter(Control, sex == "M")
+Treatment_F <- filter(Treatment, sex =="F")
+Treatment_M <-filter(Treatment, sex =="M")
+
+mean(Control_F$biomarker_ng_ml, na.rm = TRUE)
+mean(Control_M$biomarker_ng_ml, na.rm = TRUE)
+mean(Treatment_F$biomarker_ng_ml, na.rm = TRUE)
+mean(Treatment_M$biomarker_ng_ml, na.rm = TRUE)
+
+sd(Control_F$biomarker_ng_ml, na.rm = TRUE)
+sd(Control_M$biomarker_ng_ml, na.rm = TRUE)
+sd(Treatment_F$biomarker_ng_ml, na.rm = TRUE)
+sd(Treatment_M$biomarker_ng_ml, na.rm = TRUE)
+```
+Do the measurement batches appear different?
+```{r}
+library(stringr)
+str_cou
+
+
+
+```
+
