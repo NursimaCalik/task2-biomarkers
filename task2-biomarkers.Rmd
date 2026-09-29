@@ -2,7 +2,9 @@
 title: "task2-biomarkers"
 author: "Nursima Çalık"
 date: "2026-09-23"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 ## Upload Data
 ```{r}
@@ -11,7 +13,7 @@ metadata <- read.csv("data/metadata.csv")
 ```
 
 ## Examine data
-
+The data was examined.There was no any missing value. The data includes a control group of 15 individuals, a treatment group of 15 individuals, and data on 14 women and 16 men.
 ```{r}
 dim(measurements)
 str(measurements)
@@ -27,7 +29,7 @@ anyNA(metadata)
 ```
 
 ## Merge data files 
- 
+"dplyr" function was used with left_joint function to merge 2 data chart. Merging was made with sample ID column at left side. Merged data is named as combination_data. [1]
 ```{r}
 library(dplyr)
 base::nrow(measurements)
@@ -43,7 +45,7 @@ combination_data <- dplyr::left_join(x=measurements, y=metadata, by = "sample_id
 ```
 
 ## Examine combination data
-
+Merged data was examined again for ensuring accuracy. It was checked for duplicates in ID column and -if any were found- their sum with "duplicated" and "sum" functions.[2] There was no any duplicates so it was merged successfully. 
 ```{r}
 dim(combination_data)
 str(combination_data)
@@ -54,23 +56,26 @@ sum(duplicated(combination_data$sample_id))
 ```
 
 ## Explore data results
-How are the biomarker measurements distributed?
+**How are the biomarker measurements distributed?
+Distribution of biomarker measurements was plotted using point plot. Min value was 8.5 ng/ml and max value was 18.1 ng/ml. When the graph was examined, it can be said that the biomarker measurements were not clustered within a specific numerical range rather exhibited a nearly uniform distribution between the minimum and maximum values. Also mean was 13.24 ng/ml and standard variation was 2.87. It was for just general distribution of biomarker among individuals , It was necessary to examine it from many different perspective to make more accurate interpretations.
 ```{r}
 library(ggplot2)
-ggplot(data = combination_data, aes(x=biomarker_ng_ml, y=sample_id)) +
+gg1 <- ggplot(data = combination_data, aes(x=biomarker_ng_ml, y=sample_id)) +
   geom_point(size=1)+
   labs(title= "Distribution of Biomarker Measurements", x ="biomarker(ng/ml)", y="Samples") +
   theme_minimal()
-
+print(gg1)
+ggsave("Figures/gg1.jpg")
 mean(combination_data$biomarker_ng_ml, na.rm = TRUE)
 sd(combination_data$biomarker_ng_ml, na.rm = TRUE)
 max(combination_data$biomarker_ng_ml)
 min(combination_data$biomarker_ng_ml)
 
 ```
-Does the treatment group appear different from the control group?
+**Does the treatment group appear different from the control group?
+Boxplot and jitter were used for observing difference between groups. Mean of control group was 10.86 ng/ml and for treatment group, it was 15.61 ng/ml. Standard deviation of control group was 1.65 and for treatment group , it was 1.49. When the figure was observed , it can be said that many values were higher for the treatment group compared to the control group however there are also results in the control group that are higher than the value in the treatment group. Indeed, an examination of the averages revealed a difference of a certain magnitude. Standard deviations of control and treatment group were close each other and not high values. Nevertheless, it could not be made certain commend without examinations of age, sex and batch. Also new function and package that were "dplyr" and "filter" were explored and "filter" was used to pick specific term at a column and created new data chart.[3]
 ```{r}
-ggplot(data=combination_data, aes(x = group, y=biomarker_ng_ml)) +
+gg2 <- ggplot(data=combination_data, aes(x = group, y=biomarker_ng_ml)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(
     width = 0.08,
@@ -78,28 +83,33 @@ ggplot(data=combination_data, aes(x = group, y=biomarker_ng_ml)) +
   ) +
   labs(title = "Difference Between Control and Treatment Group", x = "Sex", y = "Biomarker(ng/ml)") +
   theme_minimal()
-
+print(gg2)
+ggsave("Figures/gg2.jpg")
 library(dplyr)
 Control <-filter(combination_data, group == "Control")
-mean(Control$biomarker_ng_ml, na.rm = TRUE)
 Treatment <-filter(combination_data, group == "Treatment")
+mean(Control$biomarker_ng_ml, na.rm = TRUE)
 mean(Treatment$biomarker_ng_ml, na.rm = TRUE)
 sd(Control$biomarker_ng_ml, na.rm = TRUE)
 sd(Treatment$biomarker_ng_ml, na.rm = TRUE)
 
 ```
-Does age appear to be associated with the biomarker?
+**Does age appear to be associated with the biomarker?
+When the graph is examined, it can be said that in both groups, biomarker measurement values mostly increased with age. There are also values that disrupted the linearity. If the impact of age for groups is analysed  , it can be observed that the values of treatment group were higher when 2 individuals that were at similar age from control and treatment group were compared. Therefore, it can be stated that biomarker values were generally higher in older individuals and the values in the treatment group were typically higher than in the control group. However, there were still other factors that we need to consider before reaching a conclusion. In this part of code , "scale_y/x_continuous" function was used for arranging seq of axis.[4,5]
 ```{r}
-ggplot(data = combination_data, aes(x = age, y = biomarker_ng_ml , group = group)) +
+gg3 <- ggplot(data = combination_data, aes(x = age, y = biomarker_ng_ml , group = group)) +
   geom_point(size = 1, aes(color = group)) +
   scale_y_continuous(breaks = seq(8, 20, by = 1)) +
   scale_x_continuous(breaks = seq(25, 70,by = 2)) +
   labs(title = "Relationship with Age", x = "Age", y= "Biomarker(ng/ml)" )+
   theme_minimal()
+print(gg3)
+ggsave("Figures/gg3.jpg")
 ```
-Does sex appear to be associated with the biomarker?
+**Does sex appear to be associated with the biomarker?
+When the graphs and means/standard deviations were examined , it can be said that most of values of male were higher than female for both groups based on calculated mean but especially in treatment group, there were values of female that were higher than values of male. Also standard deviations were calculated similarly except female in control group. In female control group , standard deviation was lower so it had more regular distribution. In addition there was a point in female control group. Difference between female control and treatment was higher explicitly than difference between male control and treatment. Both the more uniform distribution and the greater difference in the mean may be related to the ages of female in the group; female in this control group were considerably younger than those in the treatment group, and no such difference exists for men.[6]
 ```{r}
-ggplot(data = Control, aes(x=sex, y= biomarker_ng_ml))+
+gg4 <- ggplot(data = Control, aes(x=sex, y= biomarker_ng_ml))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(
     width = 0.08,
@@ -107,8 +117,10 @@ ggplot(data = Control, aes(x=sex, y= biomarker_ng_ml))+
   )+
   labs(title = "Relationship with Sex at Control Group",x = "Sex", y ="Biomarker(ng/ml)")+
   theme_minimal()
+print(gg4)
+ggsave("Figures/gg4.jpg")
 
-ggplot(data = Treatment, aes(x=sex, y= biomarker_ng_ml))+
+gg5 <- ggplot(data = Treatment, aes(x=sex, y= biomarker_ng_ml))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(
     width = 0.08,
@@ -116,14 +128,19 @@ ggplot(data = Treatment, aes(x=sex, y= biomarker_ng_ml))+
   )+
   labs(title = "Relationship with Sex at Treatment Group",x = "Sex", y ="Biomarker(ng/ml)")+
   theme_minimal()
+print(gg5)
+ggsave("Figures/gg5.jpg")
 
+aggregate(age ~ sex, data = Control, FUN = mean)
+aggregate(age ~ sex, data = Treatment, FUN = mean)
 aggregate(biomarker_ng_ml ~ sex, data = Control, FUN = mean)
 aggregate(biomarker_ng_ml ~ sex, data = Treatment, FUN = mean)
 aggregate(biomarker_ng_ml ~ sex, data = Control, FUN = sd)
 aggregate(biomarker_ng_ml ~ sex, data = Treatment, FUN = sd)
 
 ```
-Do the measurement batches appear different?
+**Do the measurement batches appear different?
+There were expected values at both batch so means of treatment group values were higher. means of control group and treatment group were close to each other for both batch. In the measurement batches, different numbers of male and female individuals were used for two different groups. This difference caused a slight variation in mean of measurements between batches. For instance , Batch 1 had 7 male for treatment group and Batch 2 had 2 male / 6 Female for treatment group. If the majority of male in Batch 1 for treatment group , small difference may make sense.In the given example, the ages of the male and female were also similar. The salient point of standard deviation was that standard deviation of treatment group in Batch 1 was a little bit low. Because this group consisted of males who were in similar ages. As a result, since the groups in the batches contained different numbers of male and female, the mean of the measurement values increased or decreased between batches to achieve balance. If the distribution of male and female numbers had been more balanced, it would have been clearer that the batches could have been different.
 ```{r}
 sum(combination_data$batch == "B1")
 sum(combination_data$batch == "B2")
@@ -131,7 +148,10 @@ sum(combination_data$batch == "B2")
 B1 <-filter(combination_data, batch == "B1")
 B2 <-filter(combination_data, batch == "B2")
 
-ggplot(data= B1, aes(x= group, y= biomarker_ng_ml))+
+B1 %>% count(group, sex, .drop = FALSE)
+B2 %>% count(group, sex, .drop = FALSE)
+
+gg6 <- ggplot(data= B1, aes(x= group, y= biomarker_ng_ml))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(
     width = 0.08,
@@ -139,8 +159,10 @@ ggplot(data= B1, aes(x= group, y= biomarker_ng_ml))+
   )+
   labs(title = "Difference Between Groups in B1", X= "Group", y= "Biomarker(ng/ml)")+
   theme_minimal()
+print(gg6)
+ggsave("Figures/gg6.jpg")
 
-ggplot(data= B2, aes(x= group, y= biomarker_ng_ml))+
+gg7 <- ggplot(data= B2, aes(x= group, y= biomarker_ng_ml))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(
     width = 0.08,
@@ -148,15 +170,30 @@ ggplot(data= B2, aes(x= group, y= biomarker_ng_ml))+
   )+
   labs(title = "Difference Between Groups in B2 ", X= "Group", y= "Biomarker(ng/ml)")+
   theme_minimal()
+print(gg7)
+ggsave("Figures/gg7.jpg")
 
 aggregate(biomarker_ng_ml ~ group, data = B1, FUN = mean )
 aggregate(biomarker_ng_ml ~ group, data = B2, FUN = mean )
 aggregate(biomarker_ng_ml ~ group, data = B1, FUN = sd )
 aggregate(biomarker_ng_ml ~ group, data = B2, FUN = sd )
+sessionInfo() 
 ```
 
+## Interpretation
+When comparing the results of female and male in different groups and of similar ages, the values were slightly higher in the treatment group, regardless of age. In fact, it was observed that the values were still slightly higher in the treatment group, even among individuals who were younger than those in the control group. However, when examining the effect of sex, it was notable that the average age of female in the control group was significantly lower than that of female in the treatment group, and their biomarker values were also markedly lower. If age had no effect, it would expect the difference between the groups to be smaller. Similarly, looking at the values in the table, the difference in measurements between the control and treatment groups increased as age decreased for both sex.  In this case, it may not be said that there is a definitive link between age and gender.
+There were also some confusing aspects in the study. For example, the age distribution by sex was not balanced across the groups. The average age of female in the control group was significantly lower. Although there was no significant difference for male, there was a slight difference. The same situation applied across the batches. Furthermore, while the number of individuals in the control and treatment groups within each batch was not exactly the same, it was close however, the gender distribution within the groups was not balanced. For example, there were only 7 male individuals in the B1 treatment group.
+Apart from what was mentioned, there were no outliers or unusual observations. In any case, it would have been impossible to make a definitive interpretation without knowing the expected range for the biomarker. Before reaching more definitive conclusions, it might be necessary to know what the biomarker for the disease is, its normal range in the body, whether its levels can increase or decrease due to factors unrelated to the disease, or whether individuals are taking medication regularly. It may also be important to know individuals’ emotional state in daily life for example, whether they are under a great deal of stress.
 
+## Resources 
+1.	https://www.youtube.com/watch?v=dJRpFnmgRlw 
+2.	https://www.geeksforgeeks.org/r-language/identify-and-remove-duplicate-data-in-r/
+3.  https://www.geeksforgeeks.org/r-language/filter-method-in-r/ 
+4.  https://r-charts.com/ggplot2/axis/  
+5.	https://www.youtube.com/watch?v=s0Q_XW0QVi8
+6.  https://forum.posit.co/t/finding-the-mean-of-a-column-for-specific-rows/45171/3
 
+## Problems
+1. I can not arrange space between x axis tick labels. They overlapped and are not seen clearly . So I tried “scale_x_continuous” but it did not work. Then I thought that maybe I can turn x axis tick labels 90 degree. I wanted to use “axis.title.x = element_text(angle = 45)” but my code gave error continuously . Then error was not given but there was no changing. I tried “axis.ticks.x = unit(5, "cm") “ function for ticks. Actually it is the right function but no changing. Finally I change place of x axis and y axis each other.
 
-
-
+2. I tried to show 2 boxplot in a graph but I can not . When I used for this “fill = sex”  ,  values slipped from boxes and they were only center of groups ticks.
