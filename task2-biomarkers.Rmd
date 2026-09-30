@@ -3,8 +3,8 @@ title: "task2-biomarkers"
 author: "Nursima Çalık"
 date: "2026-09-23"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 ## Upload Data
 ```{r}
@@ -57,7 +57,7 @@ sum(duplicated(combination_data$sample_id))
 
 ## Explore data results
 **How are the biomarker measurements distributed?
-Distribution of biomarker measurements was plotted using point plot. Min value was 8.5 ng/ml and max value was 18.1 ng/ml. When the graph was examined, it can be said that the biomarker measurements were not clustered within a specific numerical range rather exhibited a nearly uniform distribution between the minimum and maximum values. Also mean was 13.24 ng/ml and standard variation was 2.87. It was for just general distribution of biomarker among individuals , It was necessary to examine it from many different perspective to make more accurate interpretations.
+Distribution of biomarker measurements was plotted using point plot. Min value was 8.5 ng/ml and max value was 18.1 ng/ml. Density plot is drawn in addition to point plot because point plot did not show clearly general distribution of values.[7] With drawn density plot , it can be said that distribution was not nearly uniform even there was localization at some points. Especially these localization was at about 10 and 14-16 ng/ml. Bandwidth is chosen as 0.5 and small bumps that are seen was not very important because of small number of measurements. Also mean was 13.24 ng/ml and standard variation was 2.87. It was for just general distribution of biomarker among individuals , It was necessary to examine it from many different perspective to make more accurate interpretations.
 ```{r}
 library(ggplot2)
 gg1 <- ggplot(data = combination_data, aes(x=biomarker_ng_ml, y=sample_id)) +
@@ -71,9 +71,15 @@ sd(combination_data$biomarker_ng_ml, na.rm = TRUE)
 max(combination_data$biomarker_ng_ml)
 min(combination_data$biomarker_ng_ml)
 
+dp1 <- ggplot(data = combination_data, aes(x= biomarker_ng_ml))+
+  geom_density(bw= 0.5)+
+  labs(title= "Distribution of Biomarker Measurements", x ="biomarker(ng/ml)", y="Density") +
+  theme_minimal()
+print(dp1)
+ggsave("Figures/dp1.jpg")
 ```
 **Does the treatment group appear different from the control group?
-Boxplot and jitter were used for observing difference between groups. Mean of control group was 10.86 ng/ml and for treatment group, it was 15.61 ng/ml. Standard deviation of control group was 1.65 and for treatment group , it was 1.49. When the figure was observed , it can be said that many values were higher for the treatment group compared to the control group however there are also results in the control group that are higher than the value in the treatment group. Indeed, an examination of the averages revealed a difference of a certain magnitude. Standard deviations of control and treatment group were close each other and not high values. Nevertheless, it could not be made certain commend without examinations of age, sex and batch. Also new function and package that were "dplyr" and "filter" were explored and "filter" was used to pick specific term at a column and created new data chart.[3]
+Boxplot and jitter were used for observing difference between groups. Mean of control group was 10.86 ng/ml and for treatment group, it was 15.61 ng/ml. Standard deviation of control group was 1.65 and for treatment group , it was 1.49. When the figure was observed , it can be said that many values were higher for the treatment group compared to the control group however there are also results in the control group that are higher than the value in the treatment group. Indeed, an examination of the averages revealed a difference of a certain magnitude. Standard deviations of control and treatment group were close each other and not high values. İn addition , density plot is drawn for observing concentrations at groups. Difference of control and treatment groups were seen more clearly. There was localization at about 10 ng/ml for control group and at 15-16 ng/ml for treatment group. Also overlapping area is seen at about between 12-15 ng/ml. Nevertheless, it could not be made certain commend without examinations of age, sex and batch. Also new function and package that were "dplyr" and "filter" were explored and "filter" was used to pick specific term at a column and created new data chart.[3]
 ```{r}
 gg2 <- ggplot(data=combination_data, aes(x = group, y=biomarker_ng_ml)) +
   geom_boxplot(outlier.shape = NA) +
@@ -93,6 +99,12 @@ mean(Treatment$biomarker_ng_ml, na.rm = TRUE)
 sd(Control$biomarker_ng_ml, na.rm = TRUE)
 sd(Treatment$biomarker_ng_ml, na.rm = TRUE)
 
+dp2 <- ggplot(data = combination_data, aes(x = biomarker_ng_ml, colour =group, fill = group))+
+  geom_density(bw = 0.4, alpha = 0.4) +
+  labs(title = "Difference Between Control and Treatment Group", x = "Biomarker(ng/ml)", y = "density") +
+  theme_minimal()
+print(dp2)
+ggsave("Figures/dp2.jpg")
 ```
 **Does age appear to be associated with the biomarker?
 When the graph is examined, it can be said that in both groups, biomarker measurement values mostly increased with age. There are also values that disrupted the linearity. If the impact of age for groups is analysed  , it can be observed that the values of treatment group were higher when 2 individuals that were at similar age from control and treatment group were compared. Therefore, it can be stated that biomarker values were generally higher in older individuals and the values in the treatment group were typically higher than in the control group. However, there were still other factors that we need to consider before reaching a conclusion. In this part of code , "scale_y/x_continuous" function was used for arranging seq of axis.[4,5]
@@ -192,6 +204,7 @@ Apart from what was mentioned, there were no outliers or unusual observations. I
 4.  https://r-charts.com/ggplot2/axis/  
 5.	https://www.youtube.com/watch?v=s0Q_XW0QVi8
 6.  https://forum.posit.co/t/finding-the-mean-of-a-column-for-specific-rows/45171/3
+7.  https://www.youtube.com/watch?v=FzfE8tfbpvQ
 
 ## Problems
 1. I can not arrange space between x axis tick labels. They overlapped and are not seen clearly . So I tried “scale_x_continuous” but it did not work. Then I thought that maybe I can turn x axis tick labels 90 degree. I wanted to use “axis.title.x = element_text(angle = 45)” but my code gave error continuously . Then error was not given but there was no changing. I tried “axis.ticks.x = unit(5, "cm") “ function for ticks. Actually it is the right function but no changing. Finally I change place of x axis and y axis each other.
